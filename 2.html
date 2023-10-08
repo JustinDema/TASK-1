@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TASK 1</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #dynamic-form {
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #options-container {
+            display: none;
+        }
+
+        .center-buttons {
+            text-align: center;
+        }
+
+        #add-field {
+            margin-top: 10px;
+        }
+
+        #data-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+
+        #data-table th,
+        #data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #data-table th {
+            background-color: #007BFF;
+            color: #fff;
+        }
+
+        #data-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #data-table tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <h1>Please Fill The Form</h1>
+    <form id="dynamic-form">
+        <div class="form-group">
+            <label for="field-type">Field Type:</label>
+            <select id="field-type" class="form-control">
+                <option value="text">Text</option>
+                <option value="select">Select</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="field-name">Field Name:</label>
+            <input type="text" id="field-name" class="form-control" placeholder="Field Name">
+        </div>
+        <div id="options-container">
+            <div class="form-group">
+                <label for="options">Options (comma-separated):</label>
+                <input type="text" id="options" class="form-control" placeholder="Option 1, Option 2">
+            </div>
+        </div>
+        <div class="center-buttons">
+            <button type="button" id="add-field" class="btn btn-primary"><i class="fas fa-plus"></i> Add Field</button>
+        </div>
+        <div id="form-fields">
+            <!-- Fields will be added here -->
+        </div>
+        <div class="center-buttons">
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Data</button>
+        </div>
+    </form>
+
+    <h1>Table</h1>
+    <table id="data-table" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <!-- Table header will be added here -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table data will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Counter for unique field names
+        let fieldCounter = 0;
+
+        // Event listener for changing field type
+        $("#field-type").change(function () {
+            if ($(this).val() === "select") {
+                $("#options-container").show();
+            } else {
+                $("#options-container").hide();
+            }
+        });
+
+        // Event listener for adding a field
+        $("#add-field").click(function () {
+            fieldCounter++;
+            const fieldType = $("#field-type").val();
+            const fieldName = $("#field-name").val();
+            if (!fieldName) {
+                alert("Please enter a field name.");
+                return;
+            }
+
+            const fieldDiv = $("<div>").addClass("form-field");
+            const label = $("<label>").text(`${fieldName}: `);
+            let input;
+
+            if (fieldType === "text") {
+                input = $("<input>").attr({ type: "text", name: fieldName });
+            } else if (fieldType === "select") {
+                const options = $("#options").val().split(',').map(option => option.trim());
+                input = $("<select>").attr({ name: fieldName });
+                options.forEach(option => {
+                    const optionElement = $("<option>").text(option);
+                    input.append(optionElement);
+                });
+            }
+
+            const removeButton = $("<button>").html('<i class="fas fa-trash"></i> Remove').addClass("btn btn-danger").click(function () {
+                fieldDiv.remove();
+                updateTableHeader();
+            });
+
+            fieldDiv.append(label, input, removeButton);
+            $("#form-fields").append(fieldDiv);
+            $("#field-name").val(""); // Clear the field name input
+            updateTableHeader();
+        });
+
+        // Update the table header based on form fields
+        function updateTableHeader() {
+            const headerRow = $("#data-table thead tr");
+            headerRow.empty();
+            $(".form-field label").each(function () {
+                const fieldName = $(this).text().trim().replace(":", "");
+                headerRow.append($("<th>").text(fieldName));
+            });
+        }
+
+        // Form submit event
+        $("#dynamic-form").submit(function (event) {
+            event.preventDefault();
+            const formData = $(this).serializeArray();
+            const tableRow = $("<tr>");
+            formData.forEach(function (field) {
+                tableRow.append($("<td>").text(field.value));
+            });
+            $("#data-table tbody").append(tableRow);
+            this.reset();
+        });
+    </script>
+</body>
+
+</html>
